@@ -87,7 +87,7 @@ ui <- page_navbar(
   theme = tema_properti,
   id = "nav_utama",
   fillable = TRUE,
-)
+  
   # --- FLEXBOX & GRID CSS KHUSUS UNTUK CHECKBOX ANTI-BERANTAKAN ---
   tags$head(
     tags$style(HTML("
@@ -113,7 +113,7 @@ ui <- page_navbar(
         white-space: nowrap !important; 
       }
     "))
-  )
+  ),
   
   # ----------------------------------------------------------------------------
   # TAB 1: CARI PROPERTI 
