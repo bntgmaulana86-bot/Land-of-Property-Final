@@ -178,3 +178,106 @@ ui <- page_navbar(
       )
     )
   ),
+  
+  # ----------------------------------------------------------------------------
+  # TAB 2: KALKULATOR NILAI & STATISTIK REGRESI 
+  # ----------------------------------------------------------------------------
+  nav_panel(
+    "Kalkulator Nilai", icon = icon("calculator"),
+    div(class = "container-fluid mt-3",
+        tags$h3("Estimasi Nilai Properti & Model Kalkulasi", class = "fw-bold mb-4", style = "color: #2C3E50;"),
+        
+        layout_columns(
+          col_widths = c(4, 8),
+          
+          card(
+            class = "border-0 shadow-sm",
+            card_header("Spesifikasi Aset Untuk Prediksi", class = "bg-light fw-bold"),
+            card_body(
+              numericInput("pred_luas", "Luas Tanah (m²):", value = 150, min = 10),
+              numericInput("pred_luas_bangunan", "Luas Bangunan (m²):", value = 120, min = 10),
+              selectInput("pred_kota", "Wilayah:", choices = NULL),
+              br(),
+              actionButton("btn_prediksi", "Hitung Nilai Wajar", 
+                           class = "btn-lg w-100 fw-bold shadow", 
+                           style = "background-color: #F1C40F; color: #2C3E50; border: none;", 
+                           icon = icon("chart-line"))
+            )
+          ),
+          
+          div(
+            card(
+              class = "shadow-sm border-0",
+              card_header("Hasil Prediksi Harga Pasaran", class = "fw-bold", style = "background-color: #F39C12; color: white;"),
+              card_body(
+                layout_columns(
+                  col_widths = c(6, 6),
+                  div(
+                    tags$h6("Estimasi Harga Wajar:"),
+                    tags$h2(textOutput("hasil_prediksi"), class = "fw-bold mt-2", style = "color: #2C3E50;")
+                  ),
+                  div(
+                    tags$h6("Rata-rata Margin Kesalahan (Toleransi Meleset):", class="text-secondary"),
+                    tags$h4(textOutput("metrik_error"), class="text-danger fw-bold mt-2", style="margin-bottom: 0;"),
+                    tags$small("*(Harga asli di lapangan bisa lebih tinggi atau lebih rendah sekitar angka di atas dari estimasi)*", class="text-muted")
+                  )
+                )
+              )
+            ),
+            
+            accordion(
+              open = TRUE, class = "mt-3 shadow-sm",
+              accordion_panel(
+                "Cara Membaca Prediksi Harga Ini", icon = icon("info-circle"),
+                uiOutput("interpretasi_teks")
+              ),
+              accordion_panel(
+                "Detail Persamaan Model (Multilinear Regression)", icon = icon("superscript"),
+                uiOutput("persamaan_teks")
+              ),
+              accordion_panel(
+                "Diagnostik Sebaran Prediksi (Fitted vs Residuals)", icon = icon("chart-bar"),
+                tags$p("Grafik ini melihat apakah 'tebakan' harga dari model kita meleset jauh atau tidak. Semakin titik-titik menempel di garis merah, semakin akurat modelnya.", class="text-muted"),
+                withSpinner(plotlyOutput("plot_residual", height = "300px"), type = 4, color = "#F1C40F")
+              )
+            )
+          )
+        )
+    )
+  ),
+  
+  # ----------------------------------------------------------------------------
+  # TAB 3: STATISTIK EKSPLORATORI 
+  # ----------------------------------------------------------------------------
+  nav_panel(
+    "Eksplorasi Statistik", icon = icon("chart-pie"),
+    div(class = "container-fluid mt-3 mb-5",
+        tags$h3("Analisis Outlier (Pencilan Harga)", class = "fw-bold mb-4", style = "color: #2C3E50;"),
+        
+        layout_columns(
+          col_widths = c(12),
+          card(
+            class = "shadow-sm border-0",
+            card_header("Distribusi Harga & Deteksi Outlier (Boxplot)", class = "bg-white fw-bold"),
+            card_body(
+              tags$div(
+                class = "alert alert-info",
+                style = "background-color: #E8F8F5; border-color: #A3E4D7; color: #117864;",
+                tags$b("💡 Cara Membaca Grafik:"), tags$br(),
+                "Garis tebal di dalam kotak adalah harga tengah (median) di kota tersebut. Sedangkan ", 
+                tags$b("titik-titik merah di luar kotak"), " merupakan properti pencilan dengan harga yang melampaui standar harga pasar wajar di wilayah tersebut. Rincian angka dapat dilihat pada tabel di bawah."
+              ),
+              withSpinner(plotlyOutput("plot_boxplot", height = "450px"), type = 4, color = "#F1C40F")
+            )
+          )
+        ),
+        
+        card(
+          class = "shadow-sm border-0 mt-3",
+          card_header("Detail Angka Boxplot (Statistika Deskriptif Per Wilayah)", class = "bg-white fw-bold"),
+          card_body(
+            withSpinner(DTOutput("tabel_deskriptif"), type = 4, color = "#2C3E50")
+          )
+        )
+    )
+  ),
