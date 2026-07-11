@@ -281,3 +281,96 @@ ui <- page_navbar(
         )
     )
   ),
+  
+  # ----------------------------------------------------------------------------
+  # TAB 4: TAMBAH PROPERTI BARU 
+  # ----------------------------------------------------------------------------
+  nav_panel(
+    "Tambah Properti", icon = icon("plus-circle"),
+    div(class = "container mt-4 mb-5", style = "max-width: 900px;",
+        card(
+          class = "shadow-lg border-0",
+          card_header("Tambah Properti Baru", class = "bg-white fw-bold text-center fs-4 py-3"),
+          card_body(
+            class = "p-4",
+            layout_columns(
+              col_widths = c(6, 6),
+              textInput("title", "Nama Properti"),
+              selectInput("property_type", "Jenis Properti", choices = c("Rumah", "Townhouse", "Villa", "Apartemen")),
+              numericInput("price_in_rp", "Harga Jual (Rp)", value = 1500000000, min = 0, step = 50000000),
+              selectInput("certificate", "Jenis Sertifikat", choices = c("SHM", "HGB", "HP", "Lainnya")),
+              selectInput("city", "Kota / Wilayah", choices = list_kota[-1]),
+              textInput("district", "Kecamatan")
+            ),
+            
+            textAreaInput("address", "Alamat Lengkap (Jl, RT/RW, Patokan)", rows = 2, width = "100%"),
+            
+            textInput("url", "Link / URL Website Sumber Properti (Misal: Rumah123 / Lamudi):", 
+                      placeholder = "https://www.rumah123.com/properti/...", width = "100%"),
+            
+            hr(class = "my-4 border-2"),
+            tags$h5(icon("map-marker-alt"), " Pin Lokasi Properti", class = "fw-bold mb-3 text-secondary"),
+            tags$p("Klik area pada peta di bawah ini untuk menentukan titik koordinat Latitude dan Longitude secara otomatis.", class="text-muted"),
+            
+            leafletOutput("map_input", height = "300px"),
+            br(),
+            layout_columns(
+              col_widths = c(6, 6),
+              numericInput("lat", "📍 Latitude Koordinat", value = -6.200000, step = 0.000001),
+              numericInput("long", "📍 Longitude Koordinat", value = 106.800000, step = 0.000001)
+            ),
+            
+            hr(class = "my-4 border-2"),
+            tags$h5(icon("tools"), " Spesifikasi Fisik & Fasilitas", class = "fw-bold mb-3 text-secondary"),
+            
+            layout_columns(
+              col_widths = 3, 
+              numericInput("land_size_m2", "L. Tanah (m²)", value = 120),
+              numericInput("building_size_m2", "L. Bangunan (m²)", value = 90),
+              numericInput("bedrooms", "Kamar Tidur", value = 3, min = 1),
+              numericInput("bathrooms", "Kamar Mandi", value = 2, min = 1),
+              
+              numericInput("maid_bedrooms", "K. Tidur ART", value = 0, min = 0),
+              numericInput("maid_bathrooms", "K. Mandi ART", value = 0, min = 0),
+              numericInput("floors", "Jumlah Lantai", value = 1),
+              numericInput("garage", "Kapasitas Garasi", value = 1),
+              
+              selectizeInput("electricity", "Daya Listrik (VA)", 
+                             choices = c("450", "900", "1300", "2200", "3500", "4400", "5500", "6600"), 
+                             selected = "2200", 
+                             options = list(create = TRUE, placeholder = "Ketik/Pilih Daya")),
+              numericInput("year_built", "Tahun Dibangun", value = as.numeric(format(Sys.Date(), "%Y"))),
+              selectInput("property_condition", "Kondisi Properti", choices = c("Baru", "Bagus", "Renovasi", "Butuh Renovasi")),
+              selectInput("building_orientation", "Orientasi Bangunan", choices = c("Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut", "Tidak Diketahui")),
+              
+              selectInput("furnishing", "Kondisi Perabotan:", choices = c("Full Furnished", "Semi Furnished", "Unfurnished"), selected = "Unfurnished")
+            ),
+            
+            div(class = "mt-3 p-3 rounded shadow-sm border", style = "background-color: #F8F9FA;",
+                tags$label(icon("list-check"), " Fasilitas Pendukung:", class = "fw-bold mb-2"),
+                
+                checkboxGroupInput("facilities", label = NULL, 
+                                   choices = c("AC", "Kolam Renang", "Taman", "CCTV", 
+                                               "Keamanan 24 Jam", "Gym", "Internet", 
+                                               "Water Heater", "Balkon", "Smart Home",
+                                               "Ruang Cuci", "Dapur Bersih", "Dapur Kotor", 
+                                               "Gudang", "Bebas Banjir", "Panel Surya"), 
+                                   inline = FALSE),
+                
+                hr(style = "border-top: 1px dashed #ccc; margin: 15px 0;"),
+                
+                textInput("facilities_custom", 
+                          label = "Tambahkan Fasilitas Lainnya (Jika tidak ada di atas):", 
+                          placeholder = "Contoh: Jacuzzi, Lift, Helipad (pisahkan dengan koma jika lebih dari satu)",
+                          width = "100%")
+            ),
+            
+            br(),
+            actionButton("simpan", "Simpan Properti", 
+                         class = "btn-lg w-100 fw-bold shadow py-3", 
+                         style = "background-color: #2C3E50; color: white;", icon = icon("save"))
+          )
+        )
+    )
+  )
+)
