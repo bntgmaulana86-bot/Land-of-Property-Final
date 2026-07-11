@@ -524,3 +524,142 @@ server <- function(input, output, session) {
       ) %>%
       addLayersControl(baseGroups = c("Street Map", "Satelit"), overlayGroups = c("Titik Properti"), options = layersControlOptions(collapsed = FALSE))
   })
+  
+  output$plot_harga_kota <- renderPlotly({
+    req(nrow(data_terfilter()) > 0)
+    df_bar <- data_terfilter()
+    df_agg <- aggregate(price_in_billion_rp ~ city, data = df_bar, FUN = max)
+    counts <- table(df_bar$city)
+    df_agg$city_label <- paste0(df_agg$city, "<br>(", counts[df_agg$city], ")")
+    df_bar$city_label <- paste0(df_bar$city, "<br>(", counts[df_bar$city], ")")
+    
+    plot_ly() %>%
+      add_bars(data = df_agg, x = ~city_label, y = ~price_in_billion_rp, name = 'Maksimum', marker = list(color = '#5DADE2', opacity = 0.9), text = ~paste('Rp', round(price_in_billion_rp, 2), 'M'), hoverinfo = "text") %>%
+      add_markers(data = df_bar, x = ~city_label, y = ~price_in_billion_rp, name = 'Sebaran', marker = list(color = '#E67E22', size = 16, symbol = 'line-ew', line = list(width = 2)), text = ~paste("Rp", round(price_in_billion_rp, 2), "M"), hoverinfo = "text") %>%
+      layout(xaxis = list(title = "", tickangle = -45), yaxis = list(title = "Harga (Miliar Rp)"), margin = list(b = 60), showlegend = TRUE, plot_bgcolor = 'rgba(0,0,0,0)', paper_bgcolor = 'rgba(0,0,0,0)')
+  })
+  
+  output$plot_scatter_harga <- renderPlotly({
+    req(nrow(data_terfilter()) > 0)
+    g <- ggplot(data_terfilter(), aes(x = land_size_m2, y = price_in_billion_rp, color = city, text = paste("Kota:", city, "<br>Rp", round(price_in_billion_rp, 2), "M<br>Luas:", land_size_m2, "m²"))) +
+      geom_point(alpha = 0.7, size = 2.5) + geom_smooth(aes(group = 1), method = "lm", se = FALSE, color = "#2C3E50", linewidth = 1.2, linetype = "dashed") + 
+      theme_minimal() + labs(x = "Luas Tanah (m²)", y = "Harga Jual (Miliar Rp)", color = "Wilayah")
+    ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = 1.15))
+  })
+  
+  output$tabel_rumah <- renderDT({
+    datatable(data_terfilter()[, c("city", "price_in_rp", "bedrooms", "building_size_m2", "land_size_m2", "certificate")], 
+              options = list(pageLength = 10, scrollX = TRUE), colnames = c("Kota", "Harga (Rp)", "K. Tidur", "LB (m²)", "LT (m²)", "Sertifikat"), class = 'table-striped table-hover table-bordered') %>%
+      formatCurrency("price_in_rp", currency = "Rp ", interval = 3, mark = ".", digits = 0)
+  })
+  
+  # ==============================================================================
+  # LOGIKA MODEL REGRESI (MULTILINEAR BERBASIS LUAS TANAH + LUAS BANGUNAN)
+  # ==============================================================================
+  observe({
+    df <- rv$df
+    updateSelectInput(session, "pred_kota", choices = sort(unique(df$city[!is.na(df$city)])))
+  })
+  
+  model_regresi <- reactive({
+    lm(price_in_billion_rp ~ land_size_m2 + building_size_m2 + city, data = rv$df)
+  })
+  
+  angka_prediksi <- eventReactive(input$btn_prediksi, {
+    mod <- model_regresi()
+    data_baru <- data.frame(land_size_m2 = input$pred_luas, building_size_m2 = input$pred_luas_bangunan, city = input$pred_kota)
+    pred <- predict(mod, newdata = data_baru)
+    if(pred < 0) return(0) else return(pred)
+  }, ignoreNULL = FALSE)
+  
+  output$hasil_prediksi <- renderText({ paste("Rp", format(round(angka_prediksi(), 2), big.mark = ".", decimal.mark = ","), "M") })
+  
+  output$metrik_error <- renderText({
+    mod <- model_regresi()
+    mae_miliar <- mean(abs(residuals(mod)), na.rm = TRUE)
+    mae_juta <- mae_miliar * 1000
+    paste0("± Rp ", format(round(mae_juta, 0), big.mark = ".", decimal.mark = ","), " Juta")
+  })
+  
+  output$persamaan_teks <- renderUI({
+    mod <- model_regresi()
+    int <- round(coef(mod)[1], 2)
+    koef_luas_t <- round(coef(mod)["land_size_m2"], 3)
+    koef_luas_b <- round(coef(mod)["building_size_m2"], 3) 
+    city_koefs <- coef(mod)[grep("^city", names(coef(mod)))]
+    
+    teks_dummy <- sapply(names(city_koefs), function(nm) {
+      val <- round(city_koefs[nm], 2)
+      kota <- gsub("^city", "", nm)
+      if (!is.na(val) && val >= 0) { return(paste0("+ ", val, "( ", kota, " )")) } 
+      else if (!is.na(val)) { return(paste0("- ", abs(val), "( ", kota, " )")) }
+    })
+    
+    HTML(paste0(
+      "<div style='background-color: #f8f9fa; padding: 15px; border-left: 5px solid #F39C12; font-family: monospace;'>",
+      "<b>Y = ", int, " + ", koef_luas_t, " (LuasTanah) + ", koef_luas_b, " (LuasBangunan)</b> <br>", paste(teks_dummy, collapse = " "), "</div>"
+    ))
+  })
+  
+  output$interpretasi_teks <- renderUI({
+    mod <- model_regresi()
+    koef_luas_t <- round(coef(mod)["land_size_m2"] * 1000, 1)
+    koef_luas_b <- round(coef(mod)["building_size_m2"] * 1000, 1) 
+    if(is.na(koef_luas_t)) koef_luas_t <- 0
+    if(is.na(koef_luas_b)) koef_luas_b <- 0
+    
+    semua_kota <- unique(rv$df$city[!is.na(rv$df$city)])
+    df_uji <- data.frame(
+      land_size_m2 = median(rv$df$land_size_m2, na.rm=TRUE), 
+      building_size_m2 = median(rv$df$building_size_m2, na.rm=TRUE), 
+      city = semua_kota
+    )
+    df_uji$pred <- predict(mod, newdata = df_uji)
+    kota_termahal <- df_uji$city[which.max(df_uji$pred)]
+    
+    HTML(paste(
+      "<div style='font-size: 15px; padding: 10px;'>",
+      "<p style='margin-bottom: 15px;'><b>1. Logika Pengaruh Fisik (Luas Tanah & Bangunan):</b><br>",
+      "• Setiap penambahan luas tanah <b>1 m²</b> akan berkontribusi menaikkan harga rumah sekitar <b>Rp ", format(koef_luas_t, big.mark = ".", decimal.mark = ","), " Juta</b>.<br>",
+      "• Setiap penambahan luas bangunan <b>1 m²</b> akan berkontribusi menaikkan harga rumah sekitar <b>Rp ", format(koef_luas_b, big.mark = ".", decimal.mark = ","), " Juta</b>.</p>",
+      "<p style='margin-bottom: 0;'><b>2. Faktor Wilayah:</b><br>",
+      "Berdasarkan sebaran data saat ini, dengan asumsi ukuran fisik rumah yang sama, wilayah <b>", kota_termahal, "</b> memegang standar harga dasar pasaran tertinggi di antara area Jabodetabek lainnya.</p>",
+      "</div>"
+    ))
+  })
+  
+  output$plot_residual <- renderPlotly({
+    df_diag <- data.frame(Fitted = fitted(model_regresi()), Residuals = residuals(model_regresi()))
+    p <- ggplot(df_diag, aes(x = Fitted, y = Residuals)) + geom_point(alpha = 0.5, color = "#5DADE2") +
+      geom_hline(yintercept = 0, color = "#e74c3c", linetype = "dashed", linewidth = 1.2) + theme_minimal() +
+      labs(x = "Nilai Prediksi Harga", y = "Jarak Meleset (Residuals)")
+    ggplotly(p)
+  })
+  
+  # ==============================================================================
+  # LOGIKA TAB 3: STATISTIK EKSPLORATORI 
+  # ==============================================================================
+  output$plot_boxplot <- renderPlotly({
+    df_box <- rv$df %>% filter(!is.na(city) & !is.na(price_in_billion_rp))
+    kota_order <- df_box %>% group_by(city) %>% summarise(med = median(price_in_billion_rp, na.rm = TRUE)) %>% arrange(med) %>% pull(city)
+    df_box$city <- factor(df_box$city, levels = kota_order)
+    
+    plot_ly(data = df_box, x = ~price_in_billion_rp, y = ~city, color = ~city, type = "box", colors = "viridis", hoverinfo = "none", 
+            marker = list(color = '#e74c3c', size = 6, symbol = "circle", opacity = 0.8), line = list(width = 1.5)) %>%
+      layout(xaxis = list(title = "Harga (Miliar Rp)", zeroline = FALSE), yaxis = list(title = "Wilayah", zeroline = FALSE), showlegend = FALSE, margin = list(l = 100))
+  })
+  
+  output$tabel_deskriptif <- renderDT({
+    df_stat <- rv$df %>%
+      filter(!is.na(price_in_billion_rp) & !is.na(city)) %>%
+      group_by(city) %>%
+      summarise(Total = n(), Min = min(price_in_billion_rp), Q1 = quantile(price_in_billion_rp, 0.25), Median = median(price_in_billion_rp),
+                Rata_rata = mean(price_in_billion_rp), Q3 = quantile(price_in_billion_rp, 0.75), Max = max(price_in_billion_rp)) %>%
+      mutate(across(c(Min, Q1, Median, Rata_rata, Q3, Max), ~round(.x, 2))) %>%
+      arrange(desc(Median)) %>% rename(Wilayah = city)
+    
+    datatable(df_stat, options = list(pageLength = 8, scrollX = TRUE, dom = 'Brtip'), class = 'table-bordered table-striped', rownames = FALSE)
+  })
+}
+
+shinyApp(ui = ui, server = server)
