@@ -374,3 +374,153 @@ ui <- page_navbar(
     )
   )
 )
+
+# ==============================================================================
+# 4. SERVER LOGIC
+# ==============================================================================
+server <- function(input, output, session) {
+  
+  rv <- reactiveValues(df = df_house)
+  
+  observeEvent(input$simpan, {
+    if (input$city == "" || input$title == "") {
+      showNotification("Gagal: Lengkapi Kota dan Nama Properti!", type = "error")
+      return()
+    }
+    
+    fasilitas_terpilih <- input$facilities
+    fasilitas_custom <- trimws(input$facilities_custom)
+    semua_fasilitas <- c(fasilitas_terpilih)
+    
+    if (!is.null(fasilitas_custom) && fasilitas_custom != "") {
+      semua_fasilitas <- c(semua_fasilitas, fasilitas_custom)
+    }
+    
+    fasilitas_final <- paste(semua_fasilitas, collapse = ", ")
+    if (fasilitas_final == "") fasilitas_final <- NA 
+    
+    tryCatch({
+      data_baru <- data.frame(
+        url = trimws(input$url),  
+        price_in_rp = input$price_in_rp,
+        title = input$title,
+        address = input$address,
+        district = input$district,
+        city = input$city,
+        lat = input$lat,
+        long = input$long,
+        facilities = fasilitas_final,  
+        property_type = input$property_type,
+        ads_id = paste0("ADS", format(Sys.time(), "%Y%m%d%H%M%S")),
+        bedrooms = input$bedrooms,
+        bathrooms = input$bathrooms,
+        land_size_m2 = input$land_size_m2,
+        building_size_m2 = input$building_size_m2,
+        garage = input$garage, 
+        certificate = input$certificate,
+        electricity = input$electricity, 
+        maid_bedrooms = input$maid_bedrooms,       
+        maid_bathrooms = input$maid_bathrooms,     
+        floors = input$floors,
+        building_age = as.numeric(format(Sys.Date(), "%Y")) - input$year_built,
+        year_built = input$year_built,
+        property_condition = input$property_condition,       
+        building_orientation = input$building_orientation,   
+        furnishing = input$furnishing, 
+        price_in_billion_rp = input$price_in_rp / 1000000000,
+        stringsAsFactors = FALSE
+      )
+      
+      rv$df <- bind_rows(rv$df, data_baru)
+      
+      write.csv(rv$df, "jabodetabek_house_price.csv", row.names = FALSE)
+      
+      showNotification("Properti baru berhasil disimpan dan Data Dashboard telah diperbarui!", type = "message")
+      
+      updateTextInput(session, "url", value = "")
+      updateTextInput(session, "title", value = "")
+      updateTextInput(session, "address", value = "")
+      updateTextInput(session, "district", value = "")
+      updateTextInput(session, "facilities_custom", value = "")
+      updateCheckboxGroupInput(session, "facilities", selected = character(0))
+      updateSelectInput(session, "furnishing", selected = "Unfurnished")
+      
+    }, error = function(e) {
+      if (grepl("cannot open the connection", e$message)) {
+        showNotification("Gagal menyimpan: Pastikan file 'jabodetabek_house_price.csv' tidak sedang dibuka di Excel!", type = "error", duration = 7)
+      } else {
+        showNotification(paste("Terjadi kesalahan saat menyimpan:", e$message), type = "error")
+      }
+    })
+  })
+  
+  output$map_input <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$OpenStreetMap) %>%
+      setView(lng = 106.8229, lat = -6.2088, zoom = 10) %>% 
+      addMarkers(lng = 106.800000, lat = -6.200000, layerId = "pin_lokasi")
+  })
+  
+  observeEvent(input$map_input_click, {
+    click <- input$map_input_click
+    updateNumericInput(session, "lat", value = round(click$lat, 6))
+    updateNumericInput(session, "long", value = round(click$lng, 6))
+    leafletProxy("map_input") %>% clearMarkers() %>% addMarkers(lng = click$lng, lat = click$lat, layerId = "pin_lokasi")
+  })
+  
+  observeEvent(c(input$lat, input$long), {
+    req(input$lat, input$long)
+    leafletProxy("map_input") %>% clearMarkers() %>% addMarkers(lng = input$long, lat = input$lat, layerId = "pin_lokasi")
+  })
+  
+  data_terfilter <- reactive({
+    df <- rv$df
+    if (input$filter_kota != "Semua Kota") df <- df[df$city == input$filter_kota, ]
+    df <- df[!is.na(df$price_in_billion_rp) & df$price_in_billion_rp >= input$filter_harga[1] & df$price_in_billion_rp <= input$filter_harga[2], ]
+    df <- df[!is.na(df$bedrooms) & df$bedrooms >= input$filter_kamar[1] & df$bedrooms <= input$filter_kamar[2], ]
+    if (input$filter_sertifikat != "Semua Sertifikat") df <- df[!is.na(df$certificate) & df$certificate == input$filter_sertifikat, ]
+    df <- df[!is.na(df$land_size_m2) & df$land_size_m2 >= input$filter_luas_tanah[1] & df$land_size_m2 <= input$filter_luas_tanah[2], ]
+    df <- df[!is.na(df$building_size_m2) & df$building_size_m2 >= input$filter_luas_bangunan[1] & df$building_size_m2 <= input$filter_luas_bangunan[2], ]
+    return(df)
+  })
+  
+  output$download_data <- downloadHandler(
+    filename = function() { paste("Data_Properti_", Sys.Date(), ".csv", sep = "") },
+    content = function(file) { write.csv(data_terfilter(), file, row.names = FALSE) }
+  )
+  
+  output$box_total_listing <- renderText({ format(nrow(data_terfilter()), big.mark = ".", decimal.mark = ",") })
+  output$box_avg_harga <- renderText({
+    rata_harga <- mean(data_terfilter()$price_in_billion_rp, na.rm = TRUE)
+    if(is.nan(rata_harga)) rata_harga <- 0
+    paste0("Rp ", format(round(rata_harga, 2), big.mark = ".", decimal.mark = ","), " M")
+  })
+  output$box_avg_m2 <- renderText({
+    rata_luas <- mean(data_terfilter()$land_size_m2, na.rm = TRUE) 
+    if(is.nan(rata_luas)) rata_luas <- 0
+    paste0(format(round(rata_luas, 0), big.mark = ".", decimal.mark = ","), " m²")
+  })
+  
+  # --- PERBAIKAN UTAMA: MENGGUNAKAN PROVIDER SATELIT RESMI YANG VALID ---
+  output$peta_properti <- renderLeaflet({
+    req(data_terfilter())
+    leaflet(data_terfilter()) %>%
+      addProviderTiles(providers$OpenStreetMap, group = "Street Map") %>%
+      addProviderTiles(providers$Esri.WorldImagery, group = "Satelit") %>% # <-- Sudah diperbaiki di sini
+      addCircleMarkers(
+        lng = ~long, lat = ~lat, color = "#e74c3c", fillColor = "#e74c3c", radius = 5, fillOpacity = 0.8, weight = 1,
+        popup = ~paste0(
+          "<div style='font-family: Arial, sans-serif; min-width: 180px;'>",
+          "<h5><b>", title, "</b></h5>",
+          "<b>Wilayah:</b> ", city, "<br>",
+          "<b>Harga Jual:</b> Rp ", round(price_in_billion_rp, 2), " M<br>",
+          "<b>Spesifikasi:</b> LT ", land_size_m2, " m² | LB ", building_size_m2, " m²<br>",
+          ifelse(!is.na(url) & url != "", 
+                 paste0("<br><a href='", url, "' target='_blank' class='btn btn-warning btn-sm text-dark fw-bold w-100' style='padding: 4px; font-size: 11px; text-decoration: none; border-radius: 4px; display: inline-block; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>🌐 Kunjungi Halaman Website</a>"), 
+                 "<br><i class='text-muted' style='font-size:11px;'>Tidak ada link tautan tersedia</i>"),
+          "</div>"
+        ),
+        group = "Titik Properti"
+      ) %>%
+      addLayersControl(baseGroups = c("Street Map", "Satelit"), overlayGroups = c("Titik Properti"), options = layersControlOptions(collapsed = FALSE))
+  })
