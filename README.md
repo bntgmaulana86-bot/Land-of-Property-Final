@@ -2,13 +2,13 @@
 Dashboard interaktif berbasis R Shiny untuk eksplorasi, analisis, dan estimasi harga properti di kawasan Jabodetabek.
 
 ## Tentang Proyek
-Land of Property adalah aplikasi web dashboard yang dibangun menggunakan R Shiny untuk membantu pengguna menjelajahi data properti (rumah, townhouse, villa, apartemen) di wilayah Jabodetabek. Aplikasi ini menggabungkan visualisasi data interaktif, peta sebaran properti, analisis statistik deskriptif, serta model regresi linear berganda untuk mengestimasi harga wajar sebuah properti.
+Land of Property adalah aplikasi web dashboard yang dibangun menggunakan R Shiny untuk membantu pengguna menjelajahi data properti (rumah, townhouse, villa, dan apartemen) di wilayah Jabodetabek. Aplikasi ini menggabungkan visualisasi data interaktif, peta sebaran properti, analisis statistik deskriptif, serta model regresi linear berganda untuk mengestimasi harga wajar sebuah properti.
 
 ## Fitur Utama
 ### 1. Cari Properti
 - Filter interaktif berdasarkan kota, jenis sertifikat, rentang harga, jumlah kamar tidur, luas tanah, dan luas bangunan.
 - Ringkasan statistik cepat: total listing, rata-rata harga, dan rata-rata luas tanah.
-- Peta sebaran properti interaktif (mode Street Map & Citra Satelit) menggunakan Leaflet.
+- Peta sebaran properti interaktif.
 - Visualisasi distribusi harga per kota dan tren harga terhadap luas tanah.
 - Tabel database properti interaktif yang dapat dicari dan diurutkan.
 - Ekspor data hasil filter ke file CSV.
