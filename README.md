@@ -33,15 +33,18 @@ Land-of-Property-Final/
 
 ## Software yang Dipakai
 Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
-- shiny            : kerangka kerja aplikasi web interaktif
-- bslib            : tema Bootstrap 5 untuk UI
-- leaflet          : peta interaktif
-- plotly           : grafik interaktif
-- DT               : tabel data interaktif
-- shinycssloaders  : indikator loading
-- ggplot2          : visualisasi data statis (dirender ulang via Plotly)
-- dplyr            : manipulasi data
-- scales           : format angka & skala
+
+| Packages | Keterangan |  
+|---|---|
+| Shiny | kerangka kerja aplikasi web interaktif |
+| bslib | tema Bootstrap 5 untuk UI |
+| leaflet | peta interaktif |
+| plotly | grafik interaktif |
+| DT | tabel data interaktif |
+| shinycssloaders | indikator loading |
+| ggplot2 | visualisasi data statis (dirender ulang via Plotly) |
+| dplyr | manipulasi data |
+| scales | format angka & skala |
   
 ## Cara Penggunaan
 1. Instalasi packages
@@ -63,11 +66,12 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 4. Pastikan file jabodetabek_house_price.csv berada pada direktori kerja yang sama (working directory).
 5. Jalankan aplikasi dengan menekan tombol Run App
 
-## Kontributor: Kelompok 3 Komputasi Statistika
+## Kontributor
+Kelompok 3 Komputasi Statistika - Statistika B 2024 - Universitas Negeri Jakarta
 
 | Nama | NIM | Branch | Github  
 |---|---|---|---|
-| Musthafa Kamal | 1314624013 | `Kamal` | `@kamal141205` |
+| Musthafa Kamal | 1314624013 | `Kamal` | `@kamal141205`, `@mdkamalahmed`|
 | Pradhika Lazuardie Setiawan | 1314624039 | `dhika` | `@acumalala` |
 | Anastasya Tabita Andini | 1314624040 | `bita` | `@tabitanadini` |
 | Sultan Arya Ilham | 1314624048 | `ilham` | `@sailhamm` |
