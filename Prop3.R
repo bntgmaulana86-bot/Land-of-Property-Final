@@ -20,6 +20,7 @@ df_house <- read.csv("jabodetabek_house_price.csv", stringsAsFactors = FALSE, fi
 
 # 2. Membersihkan "kolom hantu" (kolom kosong yang terbaca sebagai X, X.1, dst dari Excel)
 df_house <- df_house[, !grepl("^X", names(df_house))]
+df_house <- df_house[!is.na(df_house$price_in_billion_rp) & df_house$price_in_billion_rp <= 50, ]
 
 # --- PERBAIKAN TOTAL DATA GANDA & KONSISTENSI KAPITALISASI TEKS ---
 if ("city" %in% colnames(df_house)) {
@@ -56,6 +57,10 @@ df_house$electricity <- as.character(df_house$electricity)
 
 # --- TAHAP PREPROCESSING PEMBERSIHAN DATA ---
 df_house <- df_house[!is.na(df_house$lat) & !is.na(df_house$long), ]
+df_house$building_age[is.na(df_house$building_age)] <- median(df_house$building_age, na.rm = TRUE)
+df_house$bedrooms[is.na(df_house$bedrooms)] <- median(df_house$bedrooms, na.rm = TRUE)
+df_house$bathrooms[is.na(df_house$bathrooms)] <- median(df_house$bathrooms, na.rm = TRUE)
+df_house$floors[is.na(df_house$floors)] <- median(df_house$floors, na.rm = TRUE)
 
 # Membatasi bounding box koordinat hanya di area Jabodetabek
 df_house <- df_house[df_house$lat >= -6.80 & df_house$lat <= -5.90 & 
