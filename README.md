@@ -66,6 +66,9 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 4. Pastikan file jabodetabek_house_price.csv berada pada direktori kerja yang sama (working directory).
 5. Jalankan aplikasi dengan menekan tombol Run App
 
+## Tautan Aplikasi
+https://sultanaryailham.shinyapps.io/landofproperty/
+
 ## Kontributor
 Kelompok 3 Komputasi Statistika - Statistika B 2024 - Universitas Negeri Jakarta
 
