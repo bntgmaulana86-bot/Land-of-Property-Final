@@ -32,7 +32,11 @@ if ("district" %in% colnames(df_house)) {
 }
 if ("certificate" %in% colnames(df_house)) {
   df_house$certificate <- trimws(gsub("\\s+", " ", df_house$certificate))
-  df_house$certificate <- toupper(df_house$certificate) 
+  df_house$certificate <- toupper(df_house$certificate)
+  df_house$certificate[grepl("SHM", df_house$certificate)] <- "SHM"
+  df_house$certificate[grepl("HGB", df_house$certificate)] <- "HGB"
+  df_house$certificate[grepl("HP", df_house$certificate)] <- "HP"
+  df_house$certificate[grepl("LAINNYA", df_house$certificate)] <- "Lainnya"
 }
 
 # 3. Hapus kolom garage lama (jika ada sisaan), lalu ubah nama carports menjadi garage
