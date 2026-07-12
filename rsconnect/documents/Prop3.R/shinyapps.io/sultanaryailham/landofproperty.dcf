@@ -1,0 +1,13 @@
+name: landofproperty
+title: landofproperty
+username: sultanaryailham
+account: sultanaryailham
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17603428
+bundleId: 12255148
+url: https://sultanaryailham.shinyapps.io/landofproperty/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: README.md
