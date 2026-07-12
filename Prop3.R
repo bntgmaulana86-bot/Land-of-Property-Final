@@ -523,7 +523,7 @@ server <- function(input, output, session) {
     req(data_terfilter())
     leaflet(data_terfilter()) %>%
       addProviderTiles(providers$OpenStreetMap, group = "Street Map") %>%
-      addProviderTiles(providers$Esri.WorldImagery, group = "Satelit") %>% # <-- Sudah diperbaiki di sini
+      addProviderTiles(providers$Esri.WorldImagery, group = "Satelit") %>% 
       addCircleMarkers(
         lng = ~long, lat = ~lat, color = "#e74c3c", fillColor = "#e74c3c", radius = 5, fillOpacity = 0.8, weight = 1,
         popup = ~paste0(
@@ -579,7 +579,8 @@ server <- function(input, output, session) {
   })
   
   model_regresi <- reactive({
-    lm(price_in_billion_rp ~ land_size_m2 + building_size_m2 + city, data = rv$df)
+    lm(price_in_billion_rp ~ land_size_m2 + building_size_m2 + city + 
+         bedrooms + bathrooms + floors + building_age, data = rv$df)
   })
   
   angka_prediksi <- eventReactive(input$btn_prediksi, {
