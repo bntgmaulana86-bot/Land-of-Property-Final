@@ -242,6 +242,12 @@ ui <- page_navbar(
     # FITUR INTERPRETASI, MODEL REGRESI, DAN PLOT RESIDUAL        
             accordion(
               open = TRUE, class = "mt-3 shadow-sm",
+              # ANOVA
+              accordion_panel(
+                "Tabel ANOVA (Analisis Varians)", icon = icon("table"),
+                tags$p("Tabel uji signifikansi model regresi (F-test & P-value) untuk memenuhi standar pelaporan statistik.", class="text-muted"),
+                withSpinner(DTOutput("tabel_anova"), type = 4, color = "#2C3E50")
+              ),
               accordion_panel(
                 "Cara Membaca Prediksi Harga Ini", icon = icon("info-circle"),
                 uiOutput("interpretasi_teks")
@@ -396,7 +402,16 @@ ui <- page_navbar(
 # 4. SERVER LOGIC
 # ==============================================================================
 server <- function(input, output, session) {
-  
+  #Tabel Anova
+  output$tabel_anova <- renderDT({
+    mod <- model_regresi() # Mengambil model regresi yang sudah kamu buat
+    df_anova <- as.data.frame(anova(mod)) # Mencetak tabel ANOVA
+    datatable(df_anova, 
+              options = list(scrollX = TRUE, dom = 't'), 
+              class = 'table-striped table-hover table-bordered') %>%
+      formatRound(columns = c("Sum Sq", "Mean Sq", "F value"), digits = 2) %>%
+      formatSignif(columns = c("Pr(>F)"), digits = 4)
+  })
   rv <- reactiveValues(df = df_house)
   
   observeEvent(input$simpan, {
