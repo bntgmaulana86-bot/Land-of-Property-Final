@@ -54,6 +54,8 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 2. Clone Repository di RStudio
    ```
    git clone https://github.com/bntgmaulana86-bot/Land-of-Property-Final.git
+   ```
+   ```
    cd Land-of-Property-Final
    ```
    (Jalankan kode diatas pada terminal RStudio satu per satu)
