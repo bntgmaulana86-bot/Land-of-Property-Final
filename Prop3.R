@@ -1,5 +1,5 @@
 # ==============================================================================
-# 1. LOAD LIBRARIES
+# 1. LIBRARY YANG DIGUNAKAN
 # ==============================================================================
 library(shiny)
 library(bslib)
@@ -12,7 +12,7 @@ library(dplyr)
 library(scales) 
 
 # ==============================================================================
-# 2. PERSIAPAN DATA & PREPROCESSING
+# 2. PERSIAPAN DATA, PREPROCESSING DATA, DAN MENGHAPUS DATA YANG KOSONG
 # ==============================================================================
 
 # 1. Membaca data dengan fill = TRUE untuk mengatasi error sisaan koma Excel
@@ -71,7 +71,7 @@ min_luas_t <- floor(min(df_house$land_size_m2, na.rm = TRUE))
 min_luas_b <- floor(min(df_house$building_size_m2, na.rm = TRUE))
 
 # ==============================================================================
-# 3. USER INTERFACE (UI) 
+# 3. SYNTAX BAGIAN USER INTERFACE (UI) 
 # ==============================================================================
 tema_properti <- bs_theme(
   version = 5,
@@ -88,7 +88,7 @@ ui <- page_navbar(
   id = "nav_utama",
   fillable = TRUE,
   
-  # --- FLEXBOX & GRID CSS KHUSUS UNTUK CHECKBOX ANTI-BERANTAKAN ---
+  # --- FLEXBOX & GRID CSS KHUSUS UNTUK CHECKBOX AGAR TIDAK BERANTAKAN ---
   tags$head(
     tags$style(HTML("
       #facilities {
@@ -116,8 +116,9 @@ ui <- page_navbar(
   ),
   
   # ----------------------------------------------------------------------------
-  # TAB 1: CARI PROPERTI 
+  # TAB AWAL/TAB 1 : CARI PROPERTI 
   # ----------------------------------------------------------------------------
+  # Fitur Filter Properti
   nav_panel(
     "Cari Properti", icon = icon("search"),
     
@@ -141,7 +142,7 @@ ui <- page_navbar(
         br(),
         downloadButton("download_data", "Export Data (CSV)", class = "btn-warning w-100 fw-bold shadow-sm")
       ),
-      
+  # Fitur Tiga Kotak di atas (TOTAL PROPERTI, RATA-RATA HARGA, DAN RATA-RATA LUAS TANAH    
       div(
         layout_columns(
           fill = FALSE,
@@ -149,13 +150,13 @@ ui <- page_navbar(
           value_box(title = "Rata-rata Harga", value = textOutput("box_avg_harga"), showcase = icon("tags"), theme = "success"),
           value_box(title = "Rata-rata Luas Tanah", value = textOutput("box_avg_m2"), showcase = icon("ruler-combined"), theme = "info")
         ),
-        
+   # FITUR PETA     
         card(
           class = "shadow-sm border-0 mt-3",
           card_header("📍 Peta Sebaran Properti (Citra Satelit & Street Map)", class = "bg-white fw-bold"),
           withSpinner(leafletOutput("peta_properti", height = "500px"), type = 4, color = "#F1C40F")
         ),
-        
+   # FITUR PLOT    
         layout_columns(
           col_widths = c(6, 6),
           card(
@@ -169,7 +170,7 @@ ui <- page_navbar(
             withSpinner(plotlyOutput("plot_scatter_harga", height = "450px"), type = 4, color = "#34495E")
           )
         ),
-        
+   # FITUR TABEL DATABASE PROPERTI     
         card(
           class = "shadow-sm border-0 mt-3 mb-4",
           card_header("📋 Database Properti Interaktif", class = "bg-white fw-bold"),
@@ -180,8 +181,9 @@ ui <- page_navbar(
   ),
   
   # ----------------------------------------------------------------------------
-  # TAB 2: KALKULATOR NILAI & STATISTIK REGRESI 
+  # TAB 2 : KALKULATOR NILAI & STATISTIK REGRESI 
   # ----------------------------------------------------------------------------
+  # FITUR PREDIKSI HARGA WAJAR
   nav_panel(
     "Kalkulator Nilai", icon = icon("calculator"),
     div(class = "container-fluid mt-3",
@@ -204,7 +206,7 @@ ui <- page_navbar(
                            icon = icon("chart-line"))
             )
           ),
-          
+     # FITUR HASIL ESTIMASI DAN RATA-RATA MARGIN KESALAHAN     
           div(
             card(
               class = "shadow-sm border-0",
@@ -224,7 +226,7 @@ ui <- page_navbar(
                 )
               )
             ),
-            
+    # FITUR INTERPRETASI, MODEL REGRESI, DAN PLOT RESIDUAL        
             accordion(
               open = TRUE, class = "mt-3 shadow-sm",
               accordion_panel(
@@ -249,11 +251,12 @@ ui <- page_navbar(
   # ----------------------------------------------------------------------------
   # TAB 3: STATISTIK EKSPLORATORI 
   # ----------------------------------------------------------------------------
+  # FITUR BOXPLOT DAN PENJELASAN
   nav_panel(
     "Eksplorasi Statistik", icon = icon("chart-pie"),
     div(class = "container-fluid mt-3 mb-5",
         tags$h3("Analisis Outlier (Pencilan Harga)", class = "fw-bold mb-4", style = "color: #2C3E50;"),
-        
+     
         layout_columns(
           col_widths = c(12),
           card(
@@ -271,7 +274,7 @@ ui <- page_navbar(
             )
           )
         ),
-        
+  # FITUR TABEL RANGKUMAN ANGKA PENTING SETIAP DAERAH   
         card(
           class = "shadow-sm border-0 mt-3",
           card_header("Detail Angka Boxplot (Statistika Deskriptif Per Wilayah)", class = "bg-white fw-bold"),
@@ -283,8 +286,9 @@ ui <- page_navbar(
   ),
   
   # ----------------------------------------------------------------------------
-  # TAB 4: TAMBAH PROPERTI BARU 
+  # TAB 4: TAMBAH PROPERTI BAGI USER SEBAGAI PENJUAL
   # ----------------------------------------------------------------------------
+  # FITUR INPUT DATA PROPERTI
   nav_panel(
     "Tambah Properti", icon = icon("plus-circle"),
     div(class = "container mt-4 mb-5", style = "max-width: 900px;",
@@ -307,7 +311,7 @@ ui <- page_navbar(
             
             textInput("url", "Link / URL Website Sumber Properti (Misal: Rumah123 / Lamudi):", 
                       placeholder = "https://www.rumah123.com/properti/...", width = "100%"),
-            
+   # FITUR PINPOINT PROPERTI         
             hr(class = "my-4 border-2"),
             tags$h5(icon("map-marker-alt"), " Pin Lokasi Properti", class = "fw-bold mb-3 text-secondary"),
             tags$p("Klik area pada peta di bawah ini untuk menentukan titik koordinat Latitude dan Longitude secara otomatis.", class="text-muted"),
@@ -319,7 +323,7 @@ ui <- page_navbar(
               numericInput("lat", "📍 Latitude Koordinat", value = -6.200000, step = 0.000001),
               numericInput("long", "📍 Longitude Koordinat", value = 106.800000, step = 0.000001)
             ),
-            
+    # FITUR SPESIFIKASI FISIK DAN FASILITAS PENDUKUNG PROPERTI        
             hr(class = "my-4 border-2"),
             tags$h5(icon("tools"), " Spesifikasi Fisik & Fasilitas", class = "fw-bold mb-3 text-secondary"),
             
@@ -364,7 +368,7 @@ ui <- page_navbar(
                           placeholder = "Contoh: Jacuzzi, Lift, Helipad (pisahkan dengan koma jika lebih dari satu)",
                           width = "100%")
             ),
-            
+   # FITUR SIMPAN PROPERTI BARU          
             br(),
             actionButton("simpan", "Simpan Properti", 
                          class = "btn-lg w-100 fw-bold shadow py-3", 
