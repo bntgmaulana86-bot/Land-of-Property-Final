@@ -1,4 +1,4 @@
-# LAND OF PROPERTY
+# LAND OF PROPERTY 
 Dashboard interaktif berbasis R Shiny untuk eksplorasi, analisis, dan estimasi harga properti di kawasan Jabodetabek.
 
 ## Tentang Proyek
@@ -23,6 +23,14 @@ Land of Property adalah aplikasi web dashboard yang dibangun menggunakan R Shiny
 - Input lengkap spesifikasi fisik dan fasilitas pendukung properti.
 - Data baru otomatis tersimpan ke file CSV dan memperbarui seluruh dashboard.
 
+## Struktur Repository
+```text
+Land-of-Property-Final/
+├── Prop3.R                       # Kode utama aplikasi Shiny (UI + Server)
+├── jabodetabek_house_price.csv   # Dataset properti Jabodetabek
+└── README.md                     # Dokumentasi proyek
+```
+
 ## Software yang Dipakai
 Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 - shiny            : kerangka kerja aplikasi web interaktif
@@ -37,7 +45,7 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
   
 ## Cara Penggunaan
 1. Instalasi packages
-   ```
+   ```R
    install.packages(c(
      "shiny", "bslib", "leaflet", "plotly", "DT",
      "shinycssloaders", "ggplot2", "dplyr", "scales"
