@@ -623,11 +623,17 @@ server <- function(input, output, session) {
     if(is.na(koef_luas_b)) koef_luas_b <- 0
     
     semua_kota <- unique(rv$df$city[!is.na(rv$df$city)])
+
     df_uji <- data.frame(
       land_size_m2 = median(rv$df$land_size_m2, na.rm=TRUE), 
       building_size_m2 = median(rv$df$building_size_m2, na.rm=TRUE), 
-      city = semua_kota
+      city = semua_kota,
+      bedrooms = median(rv$df$bedrooms, na.rm=TRUE),
+      bathrooms = median(rv$df$bathrooms, na.rm=TRUE),
+      floors = median(rv$df$floors, na.rm=TRUE),
+      building_age = median(rv$df$building_age, na.rm=TRUE)
     )
+    
     df_uji$pred <- predict(mod, newdata = df_uji)
     kota_termahal <- df_uji$city[which.max(df_uji$pred)]
     
