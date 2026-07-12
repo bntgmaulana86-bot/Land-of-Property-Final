@@ -580,7 +580,15 @@ server <- function(input, output, session) {
   
   angka_prediksi <- eventReactive(input$btn_prediksi, {
     mod <- model_regresi()
-    data_baru <- data.frame(land_size_m2 = input$pred_luas, building_size_m2 = input$pred_luas_bangunan, city = input$pred_kota)
+    data_baru <- data.frame(
+      land_size_m2 = input$pred_luas, 
+      building_size_m2 = input$pred_luas_bangunan, 
+      city = input$pred_kota,
+      bedrooms = input$pred_bedrooms,
+      bathrooms = input$pred_bathrooms,
+      floors = input$pred_floors,
+      building_age = as.numeric(format(Sys.Date(), "%Y")) - input$pred_year_built
+    )
     pred <- predict(mod, newdata = data_baru)
     if(pred < 0) return(0) else return(pred)
   }, ignoreNULL = FALSE)
