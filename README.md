@@ -1,4 +1,4 @@
-# LAND OF PROPERTY 
+# LAND OF PROPERTY 🏘️
 Dashboard interaktif berbasis R Shiny untuk eksplorasi, analisis, dan estimasi harga properti di kawasan Jabodetabek.
 
 ## Tentang Proyek
@@ -9,8 +9,8 @@ Land of Property adalah aplikasi web dashboard yang dibangun menggunakan R Shiny
 - Filter interaktif berdasarkan kota, jenis sertifikat, rentang harga, jumlah kamar tidur, luas tanah, dan luas bangunan.
 - Ringkasan statistik cepat: total listing, rata-rata harga, dan rata-rata luas tanah.
 - Peta sebaran properti interaktif (mode Street Map & Citra Satelit) menggunakan Leaflet.
-- Visualisasi distribusi harga per kota dan tren harga terhadap luas tanah (Plotly).
-- Tabel database properti interaktif yang dapat dicari dan diurutkan (DT).
+- Visualisasi distribusi harga per kota dan tren harga terhadap luas tanah.
+- Tabel database properti interaktif yang dapat dicari dan diurutkan.
 - Ekspor data hasil filter ke file CSV.
 ### 2. Kalkulator Nilai
 - Estimasi harga wajar properti berdasarkan luas tanah, luas bangunan, dan wilayah menggunakan model regresi linear berganda.
@@ -63,11 +63,13 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 4. Pastikan file jabodetabek_house_price.csv berada pada direktori kerja yang sama (working directory).
 5. Jalankan aplikasi dengan menekan tombol Run App
 
-## Kontributor
-Kelompok 3 Proyek Komputasi Statistika:
-1. Musthafa Kamal                  1314624013 @kamal141025
-2. Pradhika Lazuardie Setaiawan    1314624039 @acumalala
-3. Anastasya Tabita Andini         1314624040 @tabitanadini
-4. Sultan Arya Ilham               1314624048 @sailhamm
-5. Bintang Maulana Hafizh          1314624049 @bntgmaulana86-bot
-6. Larasati Purnamasari            1314624066 @larasatisari
+## Kontributor: Kelompok 3 Komputasi Statistika
+
+| Nama | NIM | Branch | Github  
+|---|---|---|---|
+| Musthafa Kamal | 1314624013 | Kamal | [@kamal141025](github.com/kamal141205) |
+| Pradhika Lazuardie Setaiawan | 1314624039 | dhika | [@acumalala](github.com/acumalala) |
+| Anastasya Tabita Andini | 1314624040 | bita | [@tabitanadini](github.com/tabitanadini) |
+| Sultan Arya Ilham | 1314624048 | ilham | [@sailhamm](github.com/sailhamm) |
+| Bintang Maulana Hafizh | 1314624049 | bintang | [@bntgmaulana86-bot](github.com/bntgmaulana86-bot) |
+| Larasati Purnamasari | 1314624066 | laras | [@larasatisari](github.com/larasatisari) |
