@@ -67,9 +67,9 @@ Proyek dibangun di R dengan packages yang dipakai sebagai berikut:
 
 | Nama | NIM | Branch | Github  
 |---|---|---|---|
-| Musthafa Kamal | 1314624013 | Kamal | [@kamal141205](github.com/kamal141205) |
-| Pradhika Lazuardie Setaiawan | 1314624039 | dhika | [@acumalala](github.com/acumalala) |
-| Anastasya Tabita Andini | 1314624040 | bita | [@tabitanadini](github.com/tabitanadini) |
-| Sultan Arya Ilham | 1314624048 | ilham | [@sailhamm](github.com/sailhamm) |
-| Bintang Maulana Hafizh | 1314624049 | bintang | [@bntgmaulana86-bot](github.com/bntgmaulana86-bot) |
-| Larasati Purnamasari | 1314624066 | laras | [@larasatisari](github.com/larasatisari) |
+| Musthafa Kamal | 1314624013 | `Kamal` | `@kamal141205` |
+| Pradhika Lazuardie Setaiawan | 1314624039 | `dhika` | `@acumalala` |
+| Anastasya Tabita Andini | 1314624040 | `bita` | `@tabitanadini` |
+| Sultan Arya Ilham | 1314624048 | `ilham` | `@sailhamm` |
+| Bintang Maulana Hafizh | 1314624049 | `bintang` | `@bntgmaulana86-bot` |
+| Larasati Purnamasari | 1314624066 | `laras` | `@larasatisari` |
