@@ -594,23 +594,24 @@ server <- function(input, output, session) {
     paste0("± Rp ", format(round(mae_juta, 0), big.mark = ".", decimal.mark = ","), " Juta")
   })
   
-  output$persamaan_teks <- renderUI({
+ output$persamaan_teks <- renderUI({
     mod <- model_regresi()
-    int <- round(coef(mod)[1], 2)
-    koef_luas_t <- round(coef(mod)["land_size_m2"], 3)
-    koef_luas_b <- round(coef(mod)["building_size_m2"], 3) 
-    city_koefs <- coef(mod)[grep("^city", names(coef(mod)))]
+    coefs <- coef(mod)
     
-    teks_dummy <- sapply(names(city_koefs), function(nm) {
-      val <- round(city_koefs[nm], 2)
-      kota <- gsub("^city", "", nm)
-      if (!is.na(val) && val >= 0) { return(paste0("+ ", val, "( ", kota, " )")) } 
-      else if (!is.na(val)) { return(paste0("- ", abs(val), "( ", kota, " )")) }
-    })
+    # Membuat teks dinamis berdasarkan semua koefisien yang ada di model
+    teks_model <- paste(
+      round(coefs[1], 2), # Intercept
+      paste(
+        sapply(2:length(coefs), function(i) {
+          paste0(ifelse(coefs[i] >= 0, "+ ", "- "), abs(round(coefs[i], 3)), "(", names(coefs)[i], ")")
+        }), 
+        collapse = " "
+      )
+    )
     
     HTML(paste0(
       "<div style='background-color: #f8f9fa; padding: 15px; border-left: 5px solid #F39C12; font-family: monospace;'>",
-      "<b>Y = ", int, " + ", koef_luas_t, " (LuasTanah) + ", koef_luas_b, " (LuasBangunan)</b> <br>", paste(teks_dummy, collapse = " "), "</div>"
+      "<b>Y = ", teks_model, "</b> </div>"
     ))
   })
   
